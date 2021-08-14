@@ -1,251 +1,65 @@
-import firebase from "firebase/app";
-import "firebase/auth";
-import { useContext, useState } from "react";
-import { useHistory, useLocation } from "react-router";
- 
-import { Form, Button } from "react-bootstrap";
-import firebaseConfig from "../firebaseConfig/firebaseConfig";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faFacebook } from "@fortawesome/free-brands-svg-icons";
-import { UserContext } from "../../../App";
+import React,{useContext,useState} from 'react';
+import { useForm } from "react-hook-form";
+import {UserContext} from "../../../App"
+import { useHistory } from "react-router-dom";
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-const Login = () => {
-    const [loggedInUser, setLoggedInUser] = useContext(UserContext);
+const Longin = () => {
     let history = useHistory();
-    let location = useLocation();
-    let { from } = location.state || { from: { pathname: "/" } };
-    const [newUser, setNewUser] = useState(false);
-    const [user, setUser] = useState({
-        isSignedIn: false,
-        displayName: "",
-        email: "",
-        photoURL: "",
-        name: "",
-        password: "",
-        confirm_password: "",
-        error: "",
-        success: false,
-    });
-    // console.log(user);
 
-    const handleBlur = (event) => {
-        let isFieldValid = true;
-        if (event.target.name === "email") {
-            isFieldValid = /\S+@\S+\.\S+/.test(event.target.value);
-        }
-        if (event.target.name === "password") {
-            isFieldValid = /^(?=.*\d)(?=.*[a-z])[0-9a-zA-Z]{6,}$/.test(
-                event.target.value
-            );
-        }
-        if (event.target.name === "confirm_password") {
-            isFieldValid = /^(?=.*\d)(?=.*[a-z])[0-9a-zA-Z]{6,}$/.test(
-                event.target.value
-            );
-        }
-        if (isFieldValid) {
-            const newUserInfo = { ...user };
-            newUserInfo[event.target.name] = event.target.value;
-            setUser(newUserInfo);
-        }
-    };
-    const handleSubmit = (e) => {
-        if (newUser && user.email && user.password === user.confirm_password) {
-            firebase
-                .auth()
-                .createUserWithEmailAndPassword(user.email, user.password)
-                .then((res) => {
-                    const errorMessage = "";
-                    const newUserInfo = { ...user };
-                    newUserInfo.error = errorMessage;
-                    newUserInfo.success = true;
-                    setUser(newUserInfo);
-                    // console.log(errorMessage);
-                    // console.log(user.name);
-                    updateUserName(user.name);
-                    setLoggedInUser(newUserInfo);
-                    history.replace(from);
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    const newUserInfo = { ...user };
-                    newUserInfo.error = errorMessage;
-                    newUserInfo.success = false;
-                    setUser(newUserInfo);
-                    console.log(errorMessage);
-                });
-        }
-        if (!newUser && user.email && user.password) {
-            firebase
-                .auth()
-                .signInWithEmailAndPassword(user.email, user.password)
-                .then((res) => {
-                    // Signed in
-                    const errorMessage = "";
-                    const newUserInfo = { ...user };
-                    newUserInfo.error = errorMessage;
-                    newUserInfo.success = true;
-                    console.log(newUserInfo);
-                    setUser(newUserInfo);
-                    console.log("sign in user info ", res.user);
-                    setLoggedInUser(newUserInfo);
-                    history.replace(from);
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    const newUserInfo = { ...user };
-                    newUserInfo.error = errorMessage;
-                    newUserInfo.success = false;
-                    setUser(newUserInfo);
-                    console.log(errorMessage);
-                });
-        }
-        e.preventDefault();
-    };
-    // update user info   => name ke firebase patanu
-    const updateUserName = (name) => {
-        console.log(name);
-        const user = firebase.auth().currentUser;
-        user.updateProfile({
-            displayName: name,
-        })
-            .then(function () {
-                console.log("Update successful.");
+const [loggedInUser, setLoggedInUser] = useContext(UserContext)
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const [msg, setMsg] = useState('')
+
+  const onSubmit = data => {
+      fetch("http://localhost:8000/loginUser",{
+          method:"POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data)
+      })
+      .then((res) => res.json())
+      .then((res)=>{
+          console.log({res})
+          if(res.status){
+            fetch("http://localhost:8000/isAdmin",{
+                method:"POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
             })
-            .catch(function (error) {
-                console.log(error);
-            });
-    };
-    // console.log(user.displayName);
-
-    // for google signIn
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-    const googleSignIn = () => {
-        firebase
-            .auth()
-            .signInWithPopup(googleProvider)
-            .then((res) => {
-                // console.log(res);
-                console.log(res[0]);
-                const { displayName, email, photoURL } = res.user;
-                // console.log(displayName, email, photoURL);
-
-                const signedInUser = {
-                    isSignedIn: true,
-                    displayName: displayName,
-                    email: email,
-                    photoURL: photoURL,
-                };
-                setUser(signedInUser);
-                setLoggedInUser(signedInUser);
-                history.replace(from);
+            .then((res) => res.json())
+            .then((isAdmin)=>{
+                if(isAdmin){
+                    setLoggedInUser({user:res.user, rule:'admin'})
+                    history.push("/dashboard");    
+                }else{
+                setLoggedInUser({user:res.user , rule:'user'})
+                history.push("/");
+                }
             })
-            .catch((error) => {
-                console.log(error);
-            });
-    };
-
-    // console.log(user);
+            
+          }else{
+              setLoggedInUser({})
+              setMsg(res.msg)
+          }
+      })
+  };
+   
+  
     return (
-        <div>
-            <div class="d-flex justify-content-center">
-                <Form onSubmit={handleSubmit}>
-                    <h1 class="mt-5">
-                        {newUser ? "create an account" : "Log In"}
-                    </h1>{" "}
-                    <br />
-                    <Form.Group controlId="formBasicEmail">
-                        {newUser && (
-                            <input
-                                type="text"
-                                name="name"
-                                onBlur={handleBlur}
-                                onFocus={handleBlur}
-                                placeholder="your name"
-                            />
-                        )}
-                    </Form.Group>
-                    <Form.Group controlId="formBasicEmail">
-                        <Form.Control
-                            type="email"
-                            name="email"
-                            onBlur={handleBlur}
-                            onFocus={handleBlur}
-                            placeholder="your email"
-                            required
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="formBasicEmail">
-                        <Form.Control
-                            type="password"
-                            name="password"
-                            onBlur={handleBlur}
-                            placeholder="password"
-                            required
-                        />
-                    </Form.Group>
-                    {newUser && (
-                        <Form.Group controlId="formBasicEmail">
-                            <Form.Control
-                                type="password"
-                                name="confirm_password"
-                                onBlur={handleBlur}
-                                placeholder="confirm_password"
-                                required
-                            />
-                        </Form.Group>
-                    )}
-                    <Button type="submit">
-                        {newUser ? "Sign up" : "Log In"}
-                    </Button>
-                    <Form.Group>
-                        <label htmlFor="newUser">
-                            {newUser
-                                ? "Already have an account ?"
-                                : "Don't Have an Account ?"}{" "}
-                        </label>
-                        <button
-                            style={{
-                                background: "none",
-                                color: "red",
-                                outline: "none",
-                                border: "none",
-                                textDecoration: "underline",
-                                fontSize: "20px",
-                            }}
-                            onClick={() => setNewUser(!newUser)}
-                            name="newUser"
-                        >
-                            {newUser ? "signIn" : "create an account"}
-                        </button>
-                    </Form.Group>
-                    <Form.Group>
-                        <button
-                            onClick={googleSignIn}
-                            type="button"
-                            class="btn btn-outline-success"
-                        >
-                            {/* <FontAwesomeIcon icon={faFacebook} /> */}
-                            <span class="p-4">Continue with Google</span>
-                        </button>
-                    </Form.Group>
-                </Form>
-            </div>
-
-            {user.success ? (
-                <h2 style={{ color: "green" }}>
-                    {" "}
-                    user {newUser ? "created" : "logged In"} successfully
-                </h2>
-            ) : (
-                <h5 style={{ color: "red" }}> {user.error}</h5>
-            )}
-        </div>
-    );
-};
-
-export default Login;
+     <div class="d-flex justify-content-center">
+            <form onSubmit={handleSubmit(onSubmit)}>
+        <input type="email" placeholder="Email" {...register("email", {required: true, pattern: /^\S+@\S+$/i})} />
+        {errors.email && <span>This field is required</span>}
+        <br/>
+        <input type="password" placeholder="password" {...register("pass", {required: true})} />
+        {errors.pass && <span>This field is required</span>}
+         
+        <br/>
+  
+        <input type="submit" />
+        <div>{msg}</div>
+      </form>
+     </div>
+  );
+}
+  
+export default Longin;
