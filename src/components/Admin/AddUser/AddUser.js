@@ -5,7 +5,7 @@ const AddUser = () => {
     const { register, handleSubmit,formState: { errors } } = useForm();
 
     const onSubmit = (data,e) => {
-        fetch("http://localhost:8000/addUser", {
+        fetch("https://tranquil-escarpment-70020.herokuapp.com/addUser", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),

@@ -5,7 +5,7 @@ const UserRequest = () => {
     const [requests, setRequests] = useState([]);
     console.log(requests)
     useEffect(() => {
-        fetch("http://localhost:8000/allRequest")
+        fetch("https://tranquil-escarpment-70020.herokuapp.com/allRequest")
             .then((res) => res.json())
             .then((data) => setRequests(data));
     }, []);

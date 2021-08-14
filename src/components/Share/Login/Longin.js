@@ -11,7 +11,7 @@ const [loggedInUser, setLoggedInUser] = useContext(UserContext)
     const [msg, setMsg] = useState('')
 
   const onSubmit = data => {
-      fetch("http://localhost:8000/loginUser",{
+      fetch("https://tranquil-escarpment-70020.herokuapp.com/loginUser",{
           method:"POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(data)
@@ -20,7 +20,7 @@ const [loggedInUser, setLoggedInUser] = useContext(UserContext)
       .then((res)=>{
           console.log({res})
           if(res.status){
-            fetch("http://localhost:8000/isAdmin",{
+            fetch("https://tranquil-escarpment-70020.herokuapp.com/isAdmin",{
                 method:"POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(data)

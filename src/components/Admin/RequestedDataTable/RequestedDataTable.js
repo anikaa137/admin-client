@@ -3,7 +3,7 @@ import React from "react";
 const RequestedDataTable = ({ requests,setRequests}) => {
 
     const handleStatueChange =(id,status) =>{
-        fetch("http://localhost:8000/updateUserStatus",{
+        fetch("https://tranquil-escarpment-70020.herokuapp.com/updateUserStatus",{
             method:'PUT',
             headers:{ "Content-Type":'application/json'},
             body: JSON.stringify({id,status})
@@ -11,7 +11,7 @@ const RequestedDataTable = ({ requests,setRequests}) => {
         .then((res) => res.json())
         .then((res)=>{
             if(res){
-             fetch("http://localhost:8000/allRequest")
+             fetch("https://tranquil-escarpment-70020.herokuapp.com/allRequest")
             .then((res) => res.json())
             .then((data) => setRequests(data));
             }

@@ -19,7 +19,7 @@ const Register = () => {
             userType: data.value ,
             status:  "pending"
         }
-        fetch("http://localhost:8000/register", {
+        fetch("https://tranquil-escarpment-70020.herokuapp.com/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userInfo),
