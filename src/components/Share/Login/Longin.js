@@ -45,7 +45,7 @@ const [loggedInUser, setLoggedInUser] = useContext(UserContext)
    
   
     return (
-     <div class="d-flex justify-content-center">
+     <div class="d-flex justify-content-md-center align-items-center vh-100">
             <form onSubmit={handleSubmit(onSubmit)}>
         <input type="email" placeholder="Email" {...register("email", {required: true, pattern: /^\S+@\S+$/i})} />
         {errors.email && <span>This field is required</span>}

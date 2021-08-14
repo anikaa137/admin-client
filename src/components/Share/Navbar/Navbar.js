@@ -15,7 +15,7 @@ const Navbar = () => {
             class="navbar-brand justify-content-center"
             style={{ color: "#ff8000", textDecoration: "none" }}
           >
-            <h3>Vroom Riders</h3>
+            <h3>QuickServe ITS</h3>
           </Link>
           <button
             class="navbar-toggler"

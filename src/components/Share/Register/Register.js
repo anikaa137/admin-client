@@ -36,8 +36,9 @@ const Register = () => {
         console.log(userInfo)
     };
     return (
-
-    <form onSubmit={handleSubmit(onSubmit)}>
+        
+   <div className="d-flex justify-content-md-center align-items-center vh-100">
+        <form onSubmit={handleSubmit(onSubmit)}>
       <input type="text" placeholder="Name" {...register("name", {required: true, maxLength: 80})} />
       {errors.name && <span>This field is required</span>}
       <br/>
@@ -63,6 +64,7 @@ const Register = () => {
 
       <input type="submit" />
     </form>
+   </div>
     );
 };
 
